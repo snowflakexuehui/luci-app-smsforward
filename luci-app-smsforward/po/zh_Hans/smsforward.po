@@ -1,0 +1,182 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "SmsForward"
+msgstr "短信转发"
+
+msgid "SMS forwarding via PushPlus"
+msgstr "通过 PushPlus 转发短信"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Enable"
+msgstr "启用"
+
+msgid "PushPlus Token"
+msgstr "PushPlus Token"
+
+msgid "SMS Forward Title"
+msgstr "短信转发标题"
+
+msgid "Forward History"
+msgstr "转发历史"
+
+msgid "Clear History"
+msgstr "清空历史"
+
+msgid "Status"
+msgstr "运行状态"
+
+msgid "Save & Apply"
+msgstr "保存并应用"
+
+msgid "Running"
+msgstr "运行中"
+
+msgid "Stopped"
+msgstr "未运行"
+
+msgid "Your PushPlus Token"
+msgstr "你的PushPlus Token"
+
+msgid "Default Title"
+msgstr "默认标题"
+
+msgid "Please enter token"
+msgstr "请填写token"
+
+msgid "On"
+msgstr "开"
+
+msgid "Off"
+msgstr "关"
+
+msgid "Push Type"
+msgstr "推送方式"
+
+msgid "WxPusher AppToken"
+msgstr "WxPusher AppToken"
+
+msgid "WxPusher TopicIds"
+msgstr "WxPusher TopicIds"
+
+msgid "Your WxPusher AppToken"
+msgstr "你的WxPusher AppToken"
+
+msgid "Your WxPusher TopicIds"
+msgstr "你的WxPusher TopicIds"
+
+msgid "PushDeer Key"
+msgstr "PushDeer Key"
+
+msgid "Your PushDeer Key"
+msgstr "你的PushDeer Key"
+
+msgid "WxWork Webhook"
+msgstr "企业微信Webhook"
+
+msgid "WxWork"
+msgstr "企业微信"
+
+msgid "Your WxWork Webhook"
+msgstr "你的企业微信Webhook"
+
+msgid "Bark DID"
+msgstr "Bark设备ID"
+
+msgid "Your Bark DID"
+msgstr "你的Bark设备ID"
+
+msgid "DingTalk"
+msgstr "钉钉"
+
+msgid "DingTalk Token"
+msgstr "钉钉Token"
+
+msgid "Your DingTalk Token"
+msgstr "你的钉钉Token"
+
+msgid "Feishu"
+msgstr "飞书"
+
+msgid "Feishu Webhook"
+msgstr "飞书Webhook"
+
+msgid "Your Feishu Webhook"
+msgstr "你的飞书Webhook"
+
+msgid "IYUU"
+msgstr "爱语飞飞"
+
+msgid "IYUU Token"
+msgstr "爱语飞飞Token"
+
+msgid "Your IYUU Token"
+msgstr "你的爱语飞飞Token"
+
+msgid "Only enter the part after key="
+msgstr "只输入key=后面的即可"
+
+msgid "Only enter the part after access_token="
+msgstr "只输入access_token=后面的即可"
+
+msgid "Only enter the part after hook/"
+msgstr "只输入hook/后面的即可"
+
+msgid "Only enter the part after app/"
+msgstr "只输入app/后面的即可"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+msgid "Telegram Bot Token"
+msgstr "Telegram Bot Token"
+
+msgid "Telegram Chat ID"
+msgstr "Telegram Chat ID"
+
+msgid "Please enter chat id"
+msgstr "请填写TG Chat Id"
+
+msgid "Your Telegram Bot Token"
+msgstr "你的Telegram Bot Token"
+
+msgid "Your Telegram Chat ID"
+msgstr "你的Telegram Chat ID"
+
+msgid "ServerChan"
+msgstr "Server酱"
+
+msgid "ServerChan SendKey"
+msgstr "Server酱 SendKey"
+
+msgid "Your ServerChan SendKey"
+msgstr "你的Server酱 SendKey"
+
+msgid "Test Push"
+msgstr "测试推送"
+
+msgid "Testing..."
+msgstr "测试中..."
+
+msgid "Test Push Success"
+msgstr "测试推送成功"
+
+msgid "Test message sent successfully!"
+msgstr "测试消息发送成功！"
+
+msgid "Please check your push notification."
+msgstr "请检查您的推送通知。"
+
+msgid "Test Push Failed"
+msgstr "测试推送失败"
+
+msgid "Failed to send test message. Please check the configuration."
+msgstr "发送测试消息失败，请检查配置。"
+
+msgid "Applying Configuration"
+msgstr "正在应用配置"
+
+msgid "SMS forwarding service is restarting"
+msgstr "系统正在重启短信转发服务"

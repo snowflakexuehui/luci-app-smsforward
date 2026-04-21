@@ -1,0 +1,1137 @@
+<%+header%>
+    <h2><a id="content" name="content">
+            <%:SmsForward%>
+        </a></h2>
+    <link rel="stylesheet" href="<%=resource%>/luci-overlay.css">
+    <script src="<%=resource%>/luci-overlay.js"></script>
+    <style>
+        :root {
+            --smsfwd-bg: #232323;
+            --smsfwd-card-bg: #fff;
+            --smsfwd-label: #666;
+            --smsfwd-input-bg: #f7f7f7;
+            --smsfwd-input-border: #e0e0e0;
+            --smsfwd-input-focus: #a0a0ff;
+            --smsfwd-btn-bg: #ffb300;
+            --smsfwd-btn-bg-hover: #ffa000;
+            --smsfwd-btn-secondary-bg: #e0e0e0;
+            --smsfwd-btn-secondary-hover: #bdbdbd;
+            --smsfwd-btn-secondary-color: #333;
+            --smsfwd-history-bg: #f7f7f7;
+            --smsfwd-history-border: #e0e0e0;
+            --smsfwd-status-running: #43a047;
+            --smsfwd-status-stopped: #d32f2f;
+            --smsfwd-switch-on: #43a047;
+            --smsfwd-switch-off: #424242;
+            --smsfwd-switch-shadow: rgba(67, 160, 71, 0.12);
+            --smsfwd-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --smsfwd-title: #222;
+            --smsfwd-history-color: #444;
+            --smsfwd-error: #d32f2f;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --smsfwd-bg: #181818;
+                --smsfwd-card-bg: #232323;
+                --smsfwd-label: #bbb;
+                --smsfwd-input-bg: #232323;
+                --smsfwd-input-border: #444;
+                --smsfwd-input-focus: #6c6cff;
+                --smsfwd-btn-bg: #ffb300;
+                --smsfwd-btn-bg-hover: #ffa000;
+                --smsfwd-btn-secondary-bg: #444;
+                --smsfwd-btn-secondary-hover: #666;
+                --smsfwd-btn-secondary-color: #eee;
+                --smsfwd-history-bg: #232323;
+                --smsfwd-history-border: #444;
+                --smsfwd-status-running: #7fff7f;
+                --smsfwd-status-stopped: #ff6f6f;
+                --smsfwd-switch-on: #43a047;
+                --smsfwd-switch-off: #222;
+                --smsfwd-switch-shadow: rgba(67, 160, 71, 0.18);
+                --smsfwd-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.32);
+                --smsfwd-title: #eee;
+                --smsfwd-history-color: #ccc;
+                --smsfwd-error: #ff6f6f;
+            }
+        }
+
+        .smsfwd-page-bg {
+            min-height: 100vh;
+            background: var(--smsfwd-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+
+        .smsfwd-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 48px 0 24px 0;
+            text-align: center;
+            color: var(--smsfwd-title);
+            letter-spacing: 1px;
+        }
+
+        .smsfwd-card {
+            background: var(--smsfwd-card-bg);
+            border-radius: 3px;
+            /* box-shadow: var(--smsfwd-card-shadow); */
+            box-shadow: none;
+            padding: 28px;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            min-width: 0;
+            box-sizing: border-box;
+            min-height: unset;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .smsfwd-label {
+            font-size: 1rem;
+            color: var(--smsfwd-label);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .smsfwd-input {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid var(--smsfwd-input-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            background: var(--smsfwd-input-bg);
+            color: var(--smsfwd-title);
+            transition: border 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .smsfwd-input:focus {
+            border: 1.5px solid var(--smsfwd-input-focus);
+            outline: none;
+            background: var(--smsfwd-card-bg);
+        }
+
+        .smsfwd-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .smsfwd-checkbox-wrap {
+            display: flex;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+            margin-bottom: 0;
+            margin-right: 12px;
+        }
+
+        .smsfwd-checkbox {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 6px;
+            cursor: pointer;
+        }
+
+        .smsfwd-btn,
+        .smsfwd-switch {
+            width: 140px;
+            height: 42px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 0;
+            background: var(--smsfwd-btn-bg);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .smsfwd-btn,
+        .smsfwd-switch {
+            background: var(--smsfwd-btn-bg);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(255, 179, 0, 0.08);
+        }
+
+        .smsfwd-btn:hover {
+            background: var(--smsfwd-btn-bg-hover);
+        }
+
+        .smsfwd-btn-secondary {
+            background: var(--smsfwd-btn-secondary-bg);
+            color: var(--smsfwd-btn-secondary-color);
+            border: none;
+        }
+
+        .smsfwd-btn-secondary:hover {
+            background: var(--smsfwd-btn-secondary-hover);
+        }
+
+        .smsfwd-switch {
+            border: none;
+            color: #fff;
+            background: var(--smsfwd-switch-on);
+            box-shadow: 0 2px 8px var(--smsfwd-switch-shadow);
+            cursor: pointer;
+            outline: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            margin-right: 0;
+        }
+
+        .smsfwd-switch.off {
+            background: var(--smsfwd-switch-off);
+        }
+
+        .smsfwd-switch.on {
+            background: var(--smsfwd-switch-on) !important;
+        }
+
+        .smsfwd-switch.off {
+            background: var(--smsfwd-switch-off) !important;
+        }
+
+        .wxpusher-config {
+            display: none;
+        }
+
+        .wxpusher-config.show {
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .smsfwd-history-label {
+            font-size: 1rem;
+            color: var(--smsfwd-label);
+            margin: 18px 0 6px 0;
+            display: block;
+        }
+
+        .smsfwd-snow-label {
+            font-size: 1rem;
+            color: var(--smsfwd-label);
+            margin: 18px 0 6px 0;
+            display: block;
+        }
+
+        .smsfwd-history-box {
+            width: 100%;
+            min-height: 420px;
+            max-height: 800px;
+            border: 1px solid var(--smsfwd-history-border);
+            border-radius: 8px;
+            background: var(--smsfwd-history-bg);
+            padding: 14px 16px;
+            font-size: 1rem;
+            color: var(--smsfwd-history-color);
+            resize: vertical;
+            margin-bottom: 0;
+            font-family: inherit;
+            flex: 1 1 auto;
+            box-sizing: border-box;
+        }
+
+        #smsforward-status {
+            text-align: right;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: var(--smsfwd-status-stopped);
+        }
+
+        .smsfwd-error {
+            color: var(--smsfwd-error) !important;
+        }
+
+        .smsfwd-btn-blue {
+            background: #2196f3;
+            color: #fff;
+            border: none;
+        }
+
+        .smsfwd-btn-blue:hover {
+            background: #1565c0;
+        }
+
+        .smsfwd-btn-yellow {
+            background: #ffb300;
+            color: #fff;
+            border: none;
+        }
+
+        .smsfwd-btn-yellow:hover {
+            background: #ffa000;
+        }
+
+        .smsfwd-btn-cyan {
+            background: #00acc1;
+            color: #fff;
+            border: none;
+        }
+
+        .smsfwd-btn-cyan:hover {
+            background: #0097a7;
+        }
+
+        .smsfwd-btn-red {
+            background: #d32f2f;
+            color: #fff;
+            border: none;
+        }
+
+        .smsfwd-btn-red:hover {
+            background: #b71c1c;
+        }
+
+        .smsfwd-input::placeholder {
+            color: #888 !important;
+            opacity: 1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .smsfwd-input::placeholder {
+                color: #bbb !important;
+            }
+        }
+
+        .smsfwd-input-row {
+            display: flex;
+            gap: 18px;
+            align-items: flex-end;
+        }
+
+        .smsfwd-input-col {
+            flex: 1;
+        }
+
+        .smsfwd-input-col.half {
+            flex: 0 0 calc(50% - 9px);
+        }
+
+        /* 自定义下拉框样式 */
+        .smsfwd-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .smsfwd-select-display {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid var(--smsfwd-input-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            background: var(--smsfwd-input-bg);
+            color: var(--smsfwd-title);
+            transition: border 0.2s, background 0.2s, color 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+
+        .smsfwd-select-display:focus {
+            border: 1.5px solid var(--smsfwd-input-focus);
+            outline: none;
+            background: var(--smsfwd-card-bg);
+        }
+
+        .smsfwd-select-display::after {
+            content: '▼';
+            margin-left: auto;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .smsfwd-select-display.open::after {
+            content: '▲';
+        }
+
+        .smsfwd-select-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .smsfwd-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--smsfwd-card-bg);
+            border: 1px solid var(--smsfwd-input-border);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .smsfwd-select-dropdown.show {
+            display: block;
+        }
+
+        .smsfwd-select-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--smsfwd-title);
+            transition: background 0.2s;
+        }
+
+        .smsfwd-select-option:hover {
+            background: var(--smsfwd-input-bg);
+        }
+
+        .smsfwd-select-option.selected {
+            background: var(--smsfwd-input-bg);
+        }
+
+        .smsfwd-select-wrapper select {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        /* 自动消失的提示框样式 */
+        .smsfwd-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 500px;
+            background: var(--smsfwd-card-bg);
+            border: 1px solid var(--smsfwd-input-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .smsfwd-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .smsfwd-toast.success {
+            border-left: 4px solid #43a047;
+        }
+
+        .smsfwd-toast.error {
+            border-left: 4px solid #d32f2f;
+        }
+
+        .smsfwd-toast.info {
+            border-left: 4px solid #2196f3;
+        }
+
+        .smsfwd-toast-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--smsfwd-title);
+            margin-bottom: 8px;
+        }
+
+        .smsfwd-toast-message {
+            font-size: 0.9rem;
+            color: var(--smsfwd-label);
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .smsfwd-toast-tips {
+            font-size: 0.85rem;
+            color: var(--smsfwd-label);
+            line-height: 1.4;
+            white-space: pre-line;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--smsfwd-input-border);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 800px) {
+
+            .smsfwd-btn,
+            .smsfwd-switch {
+                width: 100% !important;
+                min-width: 0;
+            }
+
+            .smsfwd-card {
+                padding: 12px 2vw 12px 2vw;
+                min-height: 60vh;
+            }
+
+            .smsfwd-bottom-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .smsfwd-btn-group {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .smsfwd-btn-group>* {
+                width: 100% !important;
+                min-width: 0;
+                justify-self: stretch;
+            }
+
+            .smsfwd-input-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .smsfwd-input-col.half {
+                flex: 1 !important;
+                width: 100% !important;
+            }
+
+            .smsfwd-input-col {
+                width: 100% !important;
+            }
+
+            .smsfwd-history-box {
+                min-height: 460px;
+            }
+        }
+    </style>
+    <fieldset class="cbi-section">
+        <legend class="cbi-section-title">
+            <%:SmsForward%>
+        </legend>
+        <div class="smsfwd-card">
+            <div id="smsforward-status"></div>
+            <form method="post" style="margin-bottom:0;display:flex;flex-direction:column;flex:1;height:100%;">
+                <!-- 第一行：短信转发标题 + 推送方式 -->
+                <div class="smsfwd-input-row">
+                    <div class="smsfwd-input-col half">
+                        <label class="smsfwd-label">
+                            <%:SMS Forward Title%>
+                        </label>
+                        <input class="smsfwd-input" type="text" name="sms_title" value="<%=sms_title%>"
+                            placeholder="<%:Default Title%>" />
+                    </div>
+                    <div class="smsfwd-input-col half">
+                        <label class="smsfwd-label">
+                            <%:Push Type%>
+                        </label>
+                        <div class="smsfwd-select-wrapper">
+                            <select class="smsfwd-input" name="push_type" id="push_type_select" onchange="togglePushConfig(); updateSelectDisplay();">
+                                <option value="0" <%=push_type=='0' and 'selected' or '' %> data-icon="pushplus.png"><%:PushPlus%>
+                                </option>
+                                <option value="1" <%=push_type=='1' and 'selected' or '' %> data-icon="wxpusher.png"><%:WxPusher%>
+                                </option>
+                                <option value="2" <%=push_type=='2' and 'selected' or '' %> data-icon="pushdeer.png"><%:PushDeer%>
+                                </option>
+                                <option value="3" <%=push_type=='3' and 'selected' or '' %> data-icon="wxwork.png"><%:WxWork%>
+                                </option>
+                                <option value="4" <%=push_type=='4' and 'selected' or '' %> data-icon="bark.png"><%:Bark%>
+                                </option>
+                                <option value="5" <%=push_type=='5' and 'selected' or '' %> data-icon="dingtalk.png"><%:DingTalk%>
+                                </option>
+                                <option value="6" <%=push_type=='6' and 'selected' or '' %> data-icon="feishu.png"><%:Feishu%>
+                                </option>
+                                <option value="7" <%=push_type=='7' and 'selected' or '' %> data-icon="iyuu.png"><%:IYUU%>
+                                </option>
+                                <option value="8" <%=push_type=='8' and 'selected' or '' %> data-icon="telegram.png"><%:Telegram%>
+                                </option>
+                                <option value="9" <%=push_type=='9' and 'selected' or '' %> data-icon="serverchan.png"><%:ServerChan%>
+                                </option>
+                            </select>
+                            <div class="smsfwd-select-display" id="push_type_display" onclick="toggleSelectDropdown()">
+                                <img class="smsfwd-select-icon" id="push_type_icon" src="<%=resource%>/view/smsforward/logo/pushplus.png" alt="">
+                                <span id="push_type_text"><%:PushPlus%></span>
+                            </div>
+                            <div class="smsfwd-select-dropdown" id="push_type_dropdown">
+                                <div class="smsfwd-select-option" data-value="0" onclick="selectOption(0)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/pushplus.png" alt="">
+                                    <span><%:PushPlus%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="1" onclick="selectOption(1)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/wxpusher.png" alt="">
+                                    <span><%:WxPusher%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="2" onclick="selectOption(2)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/pushdeer.png" alt="">
+                                    <span><%:PushDeer%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="3" onclick="selectOption(3)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/wxwork.png" alt="">
+                                    <span><%:WxWork%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="4" onclick="selectOption(4)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/bark.png" alt="">
+                                    <span><%:Bark%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="5" onclick="selectOption(5)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/dingtalk.png" alt="">
+                                    <span><%:DingTalk%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="6" onclick="selectOption(6)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/feishu.png" alt="">
+                                    <span><%:Feishu%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="7" onclick="selectOption(7)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/iyuu.png" alt="">
+                                    <span><%:IYUU%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="8" onclick="selectOption(8)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/telegram.png" alt="">
+                                    <span><%:Telegram%></span>
+                                </div>
+                                <div class="smsfwd-select-option" data-value="9" onclick="selectOption(9)">
+                                    <img class="smsfwd-select-icon" src="<%=resource%>/view/smsforward/logo/serverchan.png" alt="">
+                                    <span><%:ServerChan%></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二行：根据推送方式显示不同内容 -->
+                <!-- PushPlus Token -->
+                <div id="pushplus_row" class="<%=push_type == '0' and '' or 'hidden'%>">
+                    <div style="display:flex;align-items:center;margin-bottom:6px;">
+                        <label class="smsfwd-label" style="margin-bottom:0;">
+                            <%:PushPlus Token%>
+                        </label>
+                        <% if token_error and push_type=='0' then %>
+                            <span style="color:red;font-size:1rem;margin-left:10px;vertical-align:middle;">
+                                <%:Please enter token%>
+                            </span>
+                            <% end %>
+                    </div>
+                    <input class="smsfwd-input" type="text" name="pushplus_token"
+                        value="<% if pushplus_token and #pushplus_token > 0 then %><%=pushplus_token:sub(1,4)..string.rep('*',#pushplus_token-8)..pushplus_token:sub(-4)%><% end %>"
+                        placeholder="<%:Your PushPlus Token%>" />
+                </div>
+
+                <!-- WxPusher AppToken + UID -->
+                <div id="wxpusher_row" class="smsfwd-input-row <%=push_type == '1' and '' or 'hidden'%>">
+                    <div class="smsfwd-input-col half">
+                        <div style="display:flex;align-items:center;margin-bottom:6px;">
+                            <label class="smsfwd-label" style="margin-bottom:0;">
+                                <%:WxPusher AppToken%>
+                            </label>
+                            <% if token_error and push_type=='1' then %>
+                                <span style="color:red;font-size:1rem;margin-left:10px;vertical-align:middle;">
+                                    <%:Please enter token%>
+                                </span>
+                                <% end %>
+                        </div>
+                        <input class="smsfwd-input" type="text" name="wxpusher_token"
+                            value="<% if wxpusher_token and #wxpusher_token > 0 then %><%=wxpusher_token:sub(1,4)..string.rep('*',#wxpusher_token-8)..wxpusher_token:sub(-4)%><% end %>"
+                            placeholder="<%:Your WxPusher AppToken%>" />
+                    </div>
+                    <div class="smsfwd-input-col half">
+                        <div style="display:flex;align-items:center;margin-bottom:6px;">
+                            <label class="smsfwd-label" style="margin-bottom:0;">
+                                <%:WxPusher TopicIds%>
+                            </label>
+                            <% if token_error and push_type=='1' then %>
+                                <span style="color:red;font-size:1rem;margin-left:10px;vertical-align:middle;">
+                                    <%:Please enter token%>
+                                </span>
+                                <% end %>
+                        </div>
+                        <input class="smsfwd-input" type="text" name="wxpusher_topicids" value="<%=wxpusher_topicids%>"
+                            placeholder="<%:Your WxPusher TopicIds%>" />
+                    </div>
+                </div>
+
+                <!-- PushDeer Key -->
+                <div id="pushdeer_row" class="<%=push_type == '2' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:PushDeer Key%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="pushdeer_key"
+                        value="<% if pushdeer_key and #pushdeer_key > 0 then %><%=pushdeer_key:sub(1,4)..string.rep('*',#pushdeer_key-8)..pushdeer_key:sub(-4)%><% end %>"
+                        placeholder="<%:Your PushDeer Key%>" />
+                </div>
+                <!-- WxPusher Webhook -->
+                <div id="wxpusher_webhook_row" class="<%=push_type == '3' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:WxWork Webhook%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="wxpusher_webhook"
+                        value="<% if wxpusher_webhook and #wxpusher_webhook > 0 then %><%=wxpusher_webhook:sub(1,4)..string.rep('*',#wxpusher_webhook-8)..wxpusher_webhook:sub(-4)%><% end %>"
+                        placeholder="<%:Your WxWork Webhook%> (<%:Only enter the part after key=%>)" />
+                </div>
+                <!-- Bark DID -->
+                <div id="bark_row" class="<%=push_type == '4' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:Bark DID%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="bark_did"
+                        value="<% if bark_did and #bark_did > 0 then %><%=bark_did:sub(1,4)..string.rep('*',#bark_did-8)..bark_did:sub(-4)%><% end %>"
+                        placeholder="<%:Your Bark DID%> (<%:Only enter the part after app/%>)" />
+                </div>
+                <!-- DingTalk Token -->
+                <div id="dingtalk_row" class="<%=push_type == '5' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:DingTalk Token%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="dingtalk_token"
+                        value="<% if dingtalk_token and #dingtalk_token > 0 then %><%=dingtalk_token:sub(1,4)..string.rep('*',#dingtalk_token-8)..dingtalk_token:sub(-4)%><% end %>"
+                        placeholder="<%:Your DingTalk Token%> (<%:Only enter the part after access_token=%>)" />
+                </div>
+                <!-- Feishu Webhook -->
+                <div id="feishu_row" class="<%=push_type == '6' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:Feishu Webhook%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="feishu_webhook"
+                        value="<% if feishu_webhook and #feishu_webhook > 0 then %><%=feishu_webhook:sub(1,4)..string.rep('*',#feishu_webhook-8)..feishu_webhook:sub(-4)%><% end %>"
+                        placeholder="<%:Your Feishu Webhook%> (<%:Only enter the part after hook/%>)" />
+                </div>
+                <!-- IYUU Token -->
+                <div id="iyuu_row" class="<%=push_type == '7' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:IYUU Token%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="iyuu_token"
+                        value="<% if iyuu_token and #iyuu_token > 0 then %><%=iyuu_token:sub(1,4)..string.rep('*',#iyuu_token-8)..iyuu_token:sub(-4)%><% end %>"
+                        placeholder="<%:Your IYUU Token%>" />
+                </div>
+                <!-- Telegram Bot Token + Chat ID -->
+                <div id="telegram_row" class="smsfwd-input-row <%=push_type == '8' and '' or 'hidden'%>">
+                    <div class="smsfwd-input-col half">
+                        <div style="display:flex;align-items:center;margin-bottom:6px;">
+                            <label class="smsfwd-label" style="margin-bottom:0;">
+                                <%:Telegram Bot Token%>
+                            </label>
+                            <% if token_error and push_type=='8' then %>
+                                <span style="color:red;font-size:1rem;margin-left:10px;vertical-align:middle;">
+                                    <%:Please enter token%>
+                                </span>
+                                <% end %>
+                        </div>
+                        <input class="smsfwd-input" type="text" name="telegram_bot_token"
+                            value="<% if telegram_bot_token and #telegram_bot_token > 0 then %><%=telegram_bot_token:sub(1,4)..string.rep('*',#telegram_bot_token-8)..telegram_bot_token:sub(-4)%><% end %>"
+                            placeholder="<%:Your Telegram Bot Token%>" />
+                    </div>
+                    <div class="smsfwd-input-col half">
+                        <div style="display:flex;align-items:center;margin-bottom:6px;">
+                            <label class="smsfwd-label" style="margin-bottom:0;">
+                                <%:Telegram Chat ID%>
+                            </label>
+                            <% if token_error and push_type=='8' then %>
+                                <span style="color:red;font-size:1rem;margin-left:10px;vertical-align:middle;">
+                                    <%:Please enter chat id%>
+                                </span>
+                                <% end %>
+                        </div>
+                        <input class="smsfwd-input" type="text" name="telegram_chat_id" value="<%=telegram_chat_id%>"
+                            placeholder="<%:Your Telegram Chat ID%>" />
+                    </div>
+                </div>
+                <!-- ServerChan SendKey -->
+                <div id="serverchan_row" class="<%=push_type == '9' and '' or 'hidden'%>">
+                    <label class="smsfwd-label">
+                        <%:ServerChan SendKey%>
+                    </label>
+                    <input class="smsfwd-input" type="text" name="serverchan_sendkey"
+                        value="<% if serverchan_sendkey and #serverchan_sendkey > 0 then %><%=serverchan_sendkey:sub(1,4)..string.rep('*',#serverchan_sendkey-8)..serverchan_sendkey:sub(-4)%><% end %>"
+                        placeholder="<%:Your ServerChan SendKey%>" />
+                </div>
+                <!-- 第三行：转发历史 -->
+                <label class="smsfwd-history-label">
+                    <%:Forward History%>
+                </label>
+                <textarea readonly class="smsfwd-history-box" id="smsfwd-history"></textarea>
+                <div class="smsfwd-bottom-row">
+                    <div>
+                        <label class="smsfwd-snow-label">
+                            <%='Powered by '%><b>@Snowflakes</b></label>
+                </div>
+                <div class="smsfwd-btn-group" style="display: flex; align-items: center; gap: 18px;">
+                <div class="smsfwd-switch-wrap">
+                    <input type="hidden" id="enable_hidden" name="enable" value="<%=enable == ' 1' and '1' or '0' %>"
+                                />
+                                <button type="button" id="enable_switch"
+                                    class="smsfwd-switch <%=enable == '1' and 'on' or 'off'%>" onclick="toggleEnable()">
+                                    <span id="enable_switch_text">
+                                        <%=enable=='1' and text_on or text_off%>
+                                    </span>
+                                </button>
+                    </div>
+                    <button type="button" class="smsfwd-btn smsfwd-btn-cyan" onclick="testPush()" id="test_push_btn">
+                        <%:Test Push%>
+                    </button>
+                    <button type="submit" name="cbi.apply" class="smsfwd-btn smsfwd-btn-blue">
+                        <%:Save & Apply%>
+                    </button>
+                    <button type="button" class="smsfwd-btn smsfwd-btn-yellow" onclick="loadHistory()">
+                        <%:Forward History%>
+                    </button>
+                    <button type="button" class="smsfwd-btn smsfwd-btn-red" onclick="clearHistory()">
+                        <%:Clear History%>
+                    </button>
+                </div>
+        </div>
+        </form>
+        </div>
+    </fieldset>
+    <script type="text/javascript">
+        var TEXT_ON = "<%:On%>";
+        var TEXT_OFF = "<%:Off%>";
+        let dispatcher = null;
+        
+        // 显示自动消失的提示框
+        function showToast(title, messages, type, duration, tips) {
+            type = type || 'info';
+            duration = duration || 5000;
+            
+            // 移除已存在的提示框
+            var existingToast = document.querySelector('.smsfwd-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建提示框元素
+            var toast = document.createElement('div');
+            toast.className = 'smsfwd-toast ' + type;
+            
+            var titleEl = document.createElement('div');
+            titleEl.className = 'smsfwd-toast-title';
+            titleEl.textContent = title;
+            toast.appendChild(titleEl);
+            
+            if (messages && messages.length > 0) {
+                var messageEl = document.createElement('div');
+                messageEl.className = 'smsfwd-toast-message';
+                messageEl.textContent = messages.join('\n');
+                toast.appendChild(messageEl);
+            }
+            
+            if (tips) {
+                var tipsEl = document.createElement('div');
+                tipsEl.className = 'smsfwd-toast-tips';
+                tipsEl.textContent = tips;
+                toast.appendChild(tipsEl);
+            }
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 触发显示动画
+            setTimeout(function() {
+                toast.classList.add('show');
+            }, 10);
+            
+            // 自动移除
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        // 显示通知的辅助函数，如果 showLuciOverlay 不可用则使用自动消失的提示框
+        function showNotification(options) {
+            if (typeof showLuciOverlay === 'function') {
+                // 如果 showLuciOverlay 可用，使用它
+                showLuciOverlay(options);
+            } else {
+                // 否则使用自动消失的提示框
+                var title = options.title || '';
+                var messages = options.messages || [];
+                var tips = options.tips || '';
+                var duration = options.autoHideDelay || 5000;
+                
+                // 根据标题判断类型
+                var type = 'info';
+                if (title.indexOf('成功') !== -1 || title.indexOf('Success') !== -1) {
+                    type = 'success';
+                } else if (title.indexOf('失败') !== -1 || title.indexOf('Failed') !== -1 || title.indexOf('错误') !== -1 || title.indexOf('Error') !== -1) {
+                    type = 'error';
+                }
+                
+                showToast(title, messages, type, duration, tips);
+            }
+        }
+        
+        // 推送方式配置
+        var pushTypeConfig = {
+            '0': { icon: 'pushplus.png' },
+            '1': { icon: 'wxpusher.png' },
+            '2': { icon: 'pushdeer.png' },
+            '3': { icon: 'wxwork.png' },
+            '4': { icon: 'bark.png' },
+            '5': { icon: 'dingtalk.png' },
+            '6': { icon: 'feishu.png' },
+            '7': { icon: 'iyuu.png' },
+            '8': { icon: 'telegram.png' },
+            '9': { icon: 'serverchan.png' }
+        };
+
+        // 图标基础路径
+        var ICON_BASE_PATH = '<%=resource%>/view/smsforward/logo/';
+
+        function updateSelectDisplay() {
+            var select = document.getElementById('push_type_select');
+            var display = document.getElementById('push_type_display');
+            var icon = document.getElementById('push_type_icon');
+            var text = document.getElementById('push_type_text');
+            var dropdown = document.getElementById('push_type_dropdown');
+            var selectedValue = select.value;
+            var config = pushTypeConfig[selectedValue];
+            
+            if (config) {
+                // 使用基础路径变量
+                icon.src = ICON_BASE_PATH + config.icon;
+                // 从select的option中获取文本
+                var selectedOption = select.options[select.selectedIndex];
+                if (selectedOption) {
+                    text.textContent = selectedOption.textContent.trim();
+                }
+            }
+            
+            // 更新下拉选项的选中状态
+            var options = dropdown.querySelectorAll('.smsfwd-select-option');
+            options.forEach(function(opt) {
+                opt.classList.remove('selected');
+                if (opt.getAttribute('data-value') === selectedValue) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+
+        function toggleSelectDropdown() {
+            var dropdown = document.getElementById('push_type_dropdown');
+            var display = document.getElementById('push_type_display');
+            dropdown.classList.toggle('show');
+            display.classList.toggle('open');
+        }
+
+        function selectOption(value) {
+            var select = document.getElementById('push_type_select');
+            select.value = value;
+            updateSelectDisplay();
+            togglePushConfig();
+            toggleSelectDropdown();
+            
+            // 触发change事件
+            var event = new Event('change', { bubbles: true });
+            select.dispatchEvent(event);
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(event) {
+            var wrapper = document.querySelector('.smsfwd-select-wrapper');
+            var dropdown = document.getElementById('push_type_dropdown');
+            if (wrapper && !wrapper.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.getElementById('push_type_display').classList.remove('open');
+            }
+        });
+
+        // 初始化显示
+        updateStatus();
+        loadHistory();
+        setInterval(updateStatus, 5000);
+        
+        // 页面加载完成后初始化下拉框显示
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateSelectDisplay();
+            });
+        } else {
+            // DOM已经加载完成，直接调用
+            updateSelectDisplay();
+        }
+
+        function togglePushConfig() {
+            var pushType = document.querySelector('select[name="push_type"]').value;
+            var pushplusRow = document.getElementById('pushplus_row');
+            var wxpusherRow = document.getElementById('wxpusher_row');
+            var pushdeerRow = document.getElementById('pushdeer_row');
+            var wxpusherWebhookRow = document.getElementById('wxpusher_webhook_row');
+            var barkRow = document.getElementById('bark_row');
+            var dingtalkRow = document.getElementById('dingtalk_row');
+            var feishuRow = document.getElementById('feishu_row');
+            var iyuuRow = document.getElementById('iyuu_row');
+            var telegramRow = document.getElementById('telegram_row');
+            var serverchanRow = document.getElementById('serverchan_row');
+            pushplusRow.classList.add('hidden');
+            wxpusherRow.classList.add('hidden');
+            pushdeerRow.classList.add('hidden');
+            wxpusherWebhookRow.classList.add('hidden');
+            barkRow.classList.add('hidden');
+            dingtalkRow.classList.add('hidden');
+            feishuRow.classList.add('hidden');
+            iyuuRow.classList.add('hidden');
+            telegramRow.classList.add('hidden');
+            serverchanRow.classList.add('hidden');
+            if (pushType === '0') pushplusRow.classList.remove('hidden');
+            else if (pushType === '1') wxpusherRow.classList.remove('hidden');
+            else if (pushType === '2') pushdeerRow.classList.remove('hidden');
+            else if (pushType === '3') wxpusherWebhookRow.classList.remove('hidden');
+            else if (pushType === '4') barkRow.classList.remove('hidden');
+            else if (pushType === '5') dingtalkRow.classList.remove('hidden');
+            else if (pushType === '6') feishuRow.classList.remove('hidden');
+            else if (pushType === '7') iyuuRow.classList.remove('hidden');
+            else if (pushType === '8') telegramRow.classList.remove('hidden');
+            else if (pushType === '9') serverchanRow.classList.remove('hidden');
+        }
+
+        function updateStatus() {
+            XHR.get(
+                '/cgi-bin/luci/admin/modem/smsforward_status',
+                null,
+                function (x, data) {
+                    var html = data && data.running ? '<b style="color:green;"><%:Running%></b>' : '<b style="color:red;"><%:Stopped%></b>';
+                    document.getElementById('smsforward-status').innerHTML = '<%:Status%>: ' + html;
+                }
+            );
+        }
+        function loadHistory() {
+            var box = document.getElementById('smsfwd-history');
+            box.value = '';
+            XHR.get(
+                '/cgi-bin/luci/admin/modem/smsforward_history',
+                null,
+                function (x, data) {
+                    box.value = (data && typeof data === "string") ? data : (x && x.responseText ? x.responseText : '');
+                }
+            );
+        }
+        function clearHistory() {
+            XHR.get(
+                '/cgi-bin/luci/admin/modem/smsforward_clear_history',
+                null,
+                function (x, data) {
+                    if (data && data.success) {
+                        document.getElementById('smsfwd-history').value = '';
+                    }
+                }
+            );
+        }
+        function testPush() {
+            var btn = document.getElementById('test_push_btn');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '<%:Testing...%>';
+            
+            XHR.get(
+                '/cgi-bin/luci/admin/modem/smsforward_test',
+                null,
+                function (x, data) {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                    
+                    if (data && data.success) {
+                        showNotification({
+                            title: '<%:Test Push Success%>',
+                            messages: [
+                                '<%:Test message sent successfully!%>',
+                                '<%:Please check your push notification.%>'
+                            ],
+                            progressDuration: 1,
+                            autoHideDelay: 5000
+                        });
+                    } else {
+                        var errorMsg = (data && data.output) ? data.output : '<%:Test push failed%>';
+                        showNotification({
+                            title: '<%:Test Push Failed%>',
+                            messages: [
+                                errorMsg
+                            ],
+                            progressDuration: 1,
+                            autoHideDelay: 5000
+                        });
+                    }
+                },
+                function (x, error) {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                    showNotification({
+                        title: '<%:Test Push Failed%>',
+                        messages: [
+                            '<%:Failed to send test message. Please check the configuration.%>'
+                        ],
+                        progressDuration: 1,
+                        autoHideDelay: 5000
+                    });
+                }
+            );
+        }
+        function toggleEnable() {
+            var btn = document.getElementById('enable_switch');
+            var text = document.getElementById('enable_switch_text');
+            var hidden = document.getElementById('enable_hidden');
+            if (btn.classList.contains('on')) {
+                btn.classList.remove('on');
+                btn.classList.add('off');
+                text.textContent = TEXT_OFF;
+                hidden.value = '0';
+            } else {
+                btn.classList.remove('off');
+                btn.classList.add('on');
+                text.textContent = TEXT_ON;
+                hidden.value = '1';
+            }
+        }
+
+        // 拦截表单提交，显示遮罩
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    showNotification({
+                        title: '<%:Applying Configuration%>...',
+                        messages: [
+                            '<%:SMS forwarding service is restarting%>',
+                        ],
+                        progressDuration: 1,
+                        autoHideDelay: 5000
+                    });
+                });
+            }
+        });
+    </script>
+    <%+footer%>
